@@ -1,5 +1,7 @@
 package com.smartcity.traffic.road;
 
+import java.util.*;
+
 /**
  * Lớp RoadMapExample minh họa cách sử dụng Road & Map System.
  * Tạo một bản đồ giao thông đơn giản với các con đường, ngã rẽ và spawner.
@@ -107,25 +109,32 @@ public class RoadMapExample {
         spawner2.startSpawning();
         System.out.println("✓ Bắt đầu sinh phương tiện");
 
-        // 6. Mô phỏng một vài frame
-        System.out.println("\n6. Mô phỏng 5 frame:");
+        // 6. Mô phỏng vòng lặp (3 giây thực tế = 180 frame @ 60 FPS)
+        // Spawner S1: 2 xe/giây → sinh mỗi 0.5s → ~6 xe trong 3 giây
+        // Spawner S2: 1.5 xe/giây → sinh mỗi 0.67s → ~4 xe trong 3 giây
+        System.out.println("\n6. Mô phỏng 180 frame (3 giây @ 60 FPS):");
         double deltaTime = 0.016;  // ~60 FPS
-        for (int frame = 1; frame <= 5; frame++) {
-            // Cập nhật spawner
-            mapManager.updateSpawners(deltaTime);
-
-            // Kiểm tra xem có nên sinh phương tiện không
-            if (spawner1.update(deltaTime)) {
-                String vehicleType = spawner1.spawnVehicle();
-                System.out.printf("  Frame %d: Sinh %s tại Spawner S1\n", frame, vehicleType);
-                // Trong thực tế, sẽ tạo đối tượng Vehicle và thêm vào lane
-            }
-
-            if (spawner2.update(deltaTime)) {
-                String vehicleType = spawner2.spawnVehicle();
-                System.out.printf("  Frame %d: Sinh %s tại Spawner S2\n", frame, vehicleType);
+        int spawnCount1 = 0, spawnCount2 = 0;
+        for (int frame = 1; frame <= 180; frame++) {
+            // updateSpawners() cập nhật timer; kết quả trả về được dùng trực tiếp
+            for (VehicleSpawner sp : mapManager.getSpawners()) {
+                boolean shouldSpawn = sp.update(deltaTime);
+                if (shouldSpawn) {
+                    String vehicleType = sp.spawnVehicle();
+                    if (sp.getId().equals("S1")) {
+                        spawnCount1++;
+                        System.out.printf("  Frame %3d: [S1] Sinh %-12s | Tổng S1: %d xe\n",
+                                frame, vehicleType, spawnCount1);
+                    } else {
+                        spawnCount2++;
+                        System.out.printf("  Frame %3d: [S2] Sinh %-12s | Tổng S2: %d xe\n",
+                                frame, vehicleType, spawnCount2);
+                    }
+                }
             }
         }
+        System.out.printf("✓ Kết quả: S1 sinh %d xe, S2 sinh %d xe trong 3 giây\n",
+                spawnCount1, spawnCount2);
 
         // 7. Thống kê bản đồ
         System.out.println("\n7. Thống kê bản đồ:");

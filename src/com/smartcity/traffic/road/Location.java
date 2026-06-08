@@ -31,7 +31,7 @@ public class Location {
     public Location(double x, double y, double scale) {
         this.x = x;
         this.y = y;
-        this.scale = scale;
+        this.scale = Math.max(0.1, scale);  // Đảm bảo scale >= 0.1 (nhất quán với setScale)
     }
 
     /**
